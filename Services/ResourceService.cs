@@ -25,8 +25,7 @@ public class ResourceService: IResourceService
       Description = r.Description,
       Type = r.Type,
       Location = r.Location,
-      Quantity = r.Quantity,
-      QuantityAvailable = CalculateQuantityAvailable(r)
+      Availability = r.Availability,
     })
             .ToListAsync();
             
@@ -48,13 +47,7 @@ public class ResourceService: IResourceService
       Description = resource.Description,
       Type = resource.Type,
       Location = resource.Location,
-      Quantity = resource.Quantity,
-      QuantityAvailable = CalculateQuantityAvailable(resource)
+      Availability = resource.Availability,
     };
-  }
-  private int CalculateQuantityAvailable(Resource resource)
-  {
-    var reservedCount = resource.UserResources.Count(ur => ur.Status == "Reserved");
-    return resource.Quantity - reservedCount;
   }
 }

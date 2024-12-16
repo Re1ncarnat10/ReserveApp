@@ -26,7 +26,7 @@ public class AdminService: IAdminService
       Description = resourceDto.Description,
       Type = resourceDto.Type,
       Location = resourceDto.Location,
-      Quantity = resourceDto.Quantity,
+      Availability = resourceDto.Availability
     };
     _context.Resources.Add(resource);
     await _context.SaveChangesAsync();
@@ -52,7 +52,7 @@ public class AdminService: IAdminService
     resource.Description = resourceDto.Description;
     resource.Type = resourceDto.Type;
     resource.Location = resourceDto.Location;
-    resource.Quantity = resourceDto.Quantity;
+    resource.Availability = resourceDto.Availability;
     await _context.SaveChangesAsync();
   }
   public async Task DeleteResourceAsync(int id)
@@ -63,6 +63,33 @@ public class AdminService: IAdminService
       throw new Exception("Resource not found");
     }
     _context.Resources.Remove(resource);
+    await _context.SaveChangesAsync();
+  }
+  public async Task ChangeResourceStatusAsync(int userResourceId, string newStatus)
+  {
+    var userResource = await _context.UserResources.FindAsync(userResourceId);
+    if (userResource == null)
+    {
+      throw new Exception("Resource request not found");
+    }
+
+    var resource = await _context.Resources.FindAsync(userResource.ResourceId);
+    if (resource == null)
+    {
+      throw new Exception("Resource not found");
+    }
+
+    userResource.Status = newStatus;
+
+    if (newStatus == "Accepted")
+    {
+      resource.Availability = false;
+    }
+    else if (newStatus == "Declined" || newStatus == "Returned")
+    {
+      resource.Availability = true;
+    }
+
     await _context.SaveChangesAsync();
   }
   
