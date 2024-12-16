@@ -15,6 +15,8 @@ public class Resource
     [Required]
     public string Type { get; set; }
     [Required]
+    public string Location { get; set; }
+    [Required]
     public int Quantity { get; set; }
     
     public virtual ICollection<UserResource> UserResources { get; set; }

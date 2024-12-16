@@ -25,6 +25,7 @@ public class AdminService: IAdminService
       Name = resourceDto.Name,
       Description = resourceDto.Description,
       Type = resourceDto.Type,
+      Location = resourceDto.Location,
       Quantity = resourceDto.Quantity,
     };
     _context.Resources.Add(resource);
@@ -50,6 +51,7 @@ public class AdminService: IAdminService
     resource.Name = resourceDto.Name;
     resource.Description = resourceDto.Description;
     resource.Type = resourceDto.Type;
+    resource.Location = resourceDto.Location;
     resource.Quantity = resourceDto.Quantity;
     await _context.SaveChangesAsync();
   }

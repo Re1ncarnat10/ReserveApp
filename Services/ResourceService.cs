@@ -24,6 +24,7 @@ public class ResourceService: IResourceService
       Name = r.Name,
       Description = r.Description,
       Type = r.Type,
+      Location = r.Location,
       Quantity = r.Quantity,
       QuantityAvailable = CalculateQuantityAvailable(r)
     })
@@ -46,6 +47,7 @@ public class ResourceService: IResourceService
       Name = resource.Name,
       Description = resource.Description,
       Type = resource.Type,
+      Location = resource.Location,
       Quantity = resource.Quantity,
       QuantityAvailable = CalculateQuantityAvailable(resource)
     };

@@ -11,6 +11,8 @@ public class ResourceDto
  [Required]
  public string Type { get; set; }
  [Required]
+ public string Location { get; set; }
+ [Required]
  public int Quantity { get; set; }
  public int QuantityAvailable { get; set; }
 }
