@@ -2,7 +2,6 @@
 using ReserveApp.Data;
 using ReserveApp.Dtos;
 using ReserveApp.Interfaces;
-using ReserveApp.Models;
 
 namespace ReserveApp.Services;
 

@@ -1,6 +1,7 @@
 ﻿using ReserveApp.Interfaces;
 using ReserveApp.Data;
 using ReserveApp.Models;
+using ReserveApp.Dtos;
 
 namespace ReserveApp.Services;
 
@@ -12,7 +13,9 @@ public class UserResourceService : IUserResourceService
   {
     _context = context;
   }
-  public async Task<UserResource> RequestResourceAsync(int userId, int resourceId, DateTime rentalStartTime, TimeSpan rentalDuration)
+
+  public async Task<UserResourceDto> RequestResourceAsync(int userId, int resourceId,
+          DateTime rentalStartTime, TimeSpan rentalDuration)
   {
     var resource = await _context.Resources.FindAsync(resourceId);
     if (resource == null || !resource.Availability)
@@ -29,26 +32,18 @@ public class UserResourceService : IUserResourceService
     };
     _context.UserResources.Add(userResource);
     await _context.SaveChangesAsync();
-    return userResource;
-  }
 
-  public async Task<UserResource> ExtendResourceAsync(int userResourceId, TimeSpan rentalDuration)
-  {
-    var userResource = await _context.UserResources.FindAsync(userResourceId);
-    if (userResource == null)
+    return new UserResourceDto
     {
-      throw new Exception("Resource not found in user's inventory");
-    }
-
-    if (userResource.Status == "Accepted")
-    {
-      userResource.Status = "Waiting for decision";
-    }
-    await _context.SaveChangesAsync();
-    return userResource;
-  }
-
-  public async Task<UserResource> ReturnResourceAsync(int userResourceId)
+            UserResourceId = userResource.UserResourceId,
+            UserId = userResource.UserId.ToString(),
+            ResourceId = userResource.ResourceId,
+            RentalStartTime = userResource.RentalStartTime,
+            RentalDuration = userResource.RentalDuration,
+            TimeRemaining = userResource.TimeRemaining
+    };
+  } 
+  public async Task<UserResourceDto> ReturnResourceAsync(int userResourceId)
   {
     var userResource = await _context.UserResources.FindAsync(userResourceId);
     if (userResource == null)
@@ -66,6 +61,34 @@ public class UserResourceService : IUserResourceService
     }
 
     await _context.SaveChangesAsync();
-    return userResource;
+
+    return new UserResourceDto
+    {
+            UserResourceId = userResource.UserResourceId,
+            UserId = userResource.UserId.ToString(),
+            ResourceId = userResource.ResourceId,
+            RentalStartTime = userResource.RentalStartTime,
+            RentalDuration = userResource.RentalDuration,
+            TimeRemaining = userResource.TimeRemaining
+    };
+  }
+
+  public async Task DeleteResourceAsync(int userResourceId)
+  {
+    var userResource = await _context.UserResources.FindAsync(userResourceId);
+    if (userResource == null)
+    {
+      throw new Exception("Resource not found in user's inventory");
+    }
+
+    if (userResource.Status == "Declined" || userResource.Status == "Cancelled")
+    {
+      _context.UserResources.Remove(userResource);
+      await _context.SaveChangesAsync();
+    }
+    else
+    {
+      throw new Exception("Resource status is not Declined or Cancelled");
+    }
   }
 }

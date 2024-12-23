@@ -12,11 +12,12 @@ using ReserveApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddScoped<ILoginAndRegisterService, LoginAndRegisterService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserResourceService, UserResourceService>();
+builder.Services.AddHostedService<ResourceAvailabilityService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -65,14 +66,24 @@ builder.Services.AddAuthentication(options =>
                                     }
                     };
                 });
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+  var services = scope.ServiceProvider;
+  var dbContext = services.GetRequiredService<AppDbContext>();
+  dbContext.Database.Migrate();
+  var loginAndRegisterService = services.GetRequiredService<ILoginAndRegisterService>();
+  await loginAndRegisterService.CreateRoles();
+  var userService = scope.ServiceProvider.GetRequiredService<IAdminService>();
+  await userService.InitializeAdminAsync();
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
