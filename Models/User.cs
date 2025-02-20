@@ -12,15 +12,14 @@ namespace ReserveApp.Models
         [Required]
         public string Email { get; set; }
         public string Department { get; set; }
-        public string WorkCity { get; set; }
         
-        public User (string Name, string Surname, string Email, string Department, string WorkCity)
+        
+        public User (string Name, string Surname, string Email, string Department)
         {
             this.Name = Name;
             this.Surname = Surname;
             this.Email = Email;
             this.Department = Department;
-            this.WorkCity = WorkCity;
         }
         public User()
         {

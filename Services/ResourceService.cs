@@ -23,7 +23,7 @@ public class ResourceService: IResourceService
       Name = r.Name,
       Description = r.Description,
       Type = r.Type,
-      Location = r.Location,
+      Image = r.Image,
       Availability = r.Availability,
     })
             .ToListAsync();
@@ -45,7 +45,7 @@ public class ResourceService: IResourceService
       Name = resource.Name,
       Description = resource.Description,
       Type = resource.Type,
-      Location = resource.Location,
+      Image = resource.Image,
       Availability = resource.Availability,
     };
   }

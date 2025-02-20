@@ -7,6 +7,6 @@ public class UserDto
   public string Surname { get; set; }
   public string Email { get; set; }
   public string Department { get; set; }
-  public string WorkCity { get; set; }
+  
   public List<string> Roles { get; set; } = new List<string>();
 }

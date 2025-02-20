@@ -42,7 +42,6 @@ public class LoginAndRegisterService:ILoginAndRegisterService
       Surname = registerDto.Surname,
       Email = registerDto.Email,
       Department = registerDto.Department,
-      WorkCity = registerDto.WorkCity,
     };
     var result = await _userManager.CreateAsync(user, registerDto.Password);
     if(!result.Succeeded)

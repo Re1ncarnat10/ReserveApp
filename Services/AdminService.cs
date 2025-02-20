@@ -27,7 +27,7 @@ namespace ReserveApp.Services
                 Name = resourceDto.Name,
                 Description = resourceDto.Description,
                 Type = resourceDto.Type,
-                Location = resourceDto.Location,
+                Image = resourceDto.Image,
                 Availability = resourceDto.Availability
             };
             _context.Resources.Add(resource);
@@ -56,7 +56,7 @@ namespace ReserveApp.Services
             resource.Name = resourceDto.Name;
             resource.Description = resourceDto.Description;
             resource.Type = resourceDto.Type;
-            resource.Location = resourceDto.Location;
+            resource.Image = resourceDto.Image;
             resource.Availability = resourceDto.Availability;
             await _context.SaveChangesAsync();
         }
@@ -170,7 +170,6 @@ namespace ReserveApp.Services
                 Surname = user.Surname,
                 Email = user.Email,
                 Department = user.Department,
-                WorkCity = user.WorkCity,
             };
         }
 
@@ -184,7 +183,6 @@ namespace ReserveApp.Services
                 Surname = user.Surname,
                 Email = user.Email,
                 Department = user.Department,
-                WorkCity = user.WorkCity,
             }).ToList();
         }
 
@@ -211,7 +209,6 @@ namespace ReserveApp.Services
             user.Surname = userDto.Surname;
             user.Email = userDto.Email;
             user.Department = userDto.Department;
-            user.WorkCity = userDto.WorkCity;
             await _userManager.UpdateAsync(user);
         }
 
@@ -231,7 +228,6 @@ namespace ReserveApp.Services
                 Name = "admin",
                 Surname = "admin",
                 Department = "admin",
-                WorkCity = "admin"
             };
             var createUserResult = await _userManager.CreateAsync(adminUser, "Admin123!");
             if (!createUserResult.Succeeded)
