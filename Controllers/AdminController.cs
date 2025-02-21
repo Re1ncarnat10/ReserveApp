@@ -117,7 +117,7 @@ namespace ReserveApp.Controllers
         }
 
         [HttpGet("user/{userId}/resources")]
-        public async Task<IActionResult> GetUserResourcesByUserId(int userId)
+        public async Task<IActionResult> GetUserResourcesByUserId(string userId)
         {
             var userResources = await _adminService.GetUserResourcesByUserIdAsync(userId);
             return Ok(userResources);

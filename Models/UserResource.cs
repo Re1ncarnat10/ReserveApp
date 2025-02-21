@@ -9,7 +9,7 @@ namespace ReserveApp.Models
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int UserResourceId { get; set; }
 
-    [Required] public int UserId { get; set; }
+    [Required] public string UserId { get; set; }
     [ForeignKey("UserId")] public virtual User? User { get; set; }
     [Required] public int ResourceId { get; set; }
     [ForeignKey("ResourceId")] public virtual Resource? Resource { get; set; }

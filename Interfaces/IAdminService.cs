@@ -12,7 +12,7 @@ namespace ReserveApp.Interfaces
     Task ChangeResourceStatusAsync(UserResourceDto userResourceDto, string newStatus);
     Task UpdateUserResourceRentalDurationAsync(UserResourceDto userResourceDto, TimeSpan additionalRentalDuration);
     Task<IEnumerable<UserResourceDto>> GetAllUserResourcesAsync();
-    Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(int userId);
+    Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(string userId);
     Task<UserDto> GetUserByIdAsync(string userId);
     Task<IEnumerable<UserDto>> GetAllUsersAsync();
     Task DeleteUserAsync(string userId);

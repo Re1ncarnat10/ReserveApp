@@ -132,7 +132,7 @@ namespace ReserveApp.Services
             }).ToList();
         }
 
-        public async Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(int userId)
+        public async Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(string userId)
         {
             var userResources = await _context.UserResources
                             .Where(ur => ur.UserId == userId)

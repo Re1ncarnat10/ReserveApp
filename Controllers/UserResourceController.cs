@@ -20,12 +20,12 @@ namespace ReserveApp.Controllers
         {
             try
             {
-                if (!int.TryParse(requestDto.UserId, out int userId))
+                if (string.IsNullOrEmpty(requestDto.UserId))
                 {
                     return BadRequest("Invalid UserId");
                 }
 
-                var result = await _userResourceService.RequestResourceAsync(userId, requestDto.ResourceId, requestDto.RentalStartTime, requestDto.RentalDuration);
+                var result = await _userResourceService.RequestResourceAsync(requestDto.UserId, requestDto.ResourceId, requestDto.RentalStartTime, requestDto.RentalDuration);
                 return Ok(result);
             }
             catch (Exception ex)

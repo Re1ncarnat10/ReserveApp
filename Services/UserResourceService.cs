@@ -14,7 +14,7 @@ public class UserResourceService : IUserResourceService
     _context = context;
   }
 
-  public async Task<UserResourceDto> RequestResourceAsync(int userId, int resourceId,
+  public async Task<UserResourceDto> RequestResourceAsync(string userId, int resourceId,
           DateTime rentalStartTime, TimeSpan rentalDuration)
   {
     var resource = await _context.Resources.FindAsync(resourceId);
