@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ReserveApp.Models;
 
 namespace ReserveApp.Data
 {
-  public class AppDbContext : DbContext
+  public class AppDbContext : IdentityDbContext<User>
   {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
+
     public DbSet<Resource> Resources { get; set; }
     public DbSet<UserResource> UserResources { get; set; }
 

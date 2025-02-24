@@ -5,7 +5,7 @@ using ReserveApp.Dtos;
 namespace ReserveApp.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api")]
   public class LoginAndRegisterController : ControllerBase
   {
     private readonly ILoginAndRegisterService _loginAndRegisterService;
@@ -18,12 +18,18 @@ namespace ReserveApp.Controllers
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-      var result = await _loginAndRegisterService.RegisterUserAsync(registerDto);
-      if (!result.Succeeded)
+      if (!ModelState.IsValid)
       {
-        return BadRequest(result.Errors);
+        return BadRequest(ModelState);
       }
-      return Ok("User registered successfully");
+
+      var result = await _loginAndRegisterService.RegisterUserAsync(registerDto);
+      if (result.Succeeded)
+      {
+        return Ok(new { message = "User registered successfully" });
+      }
+
+      return BadRequest(result.Errors);
     }
 
     [HttpPost("login")]

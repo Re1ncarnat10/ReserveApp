@@ -1,4 +1,5 @@
-﻿using ReserveApp.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using ReserveApp.Interfaces;
 using ReserveApp.Data;
 using ReserveApp.Models;
 using ReserveApp.Dtos;
@@ -42,7 +43,26 @@ public class UserResourceService : IUserResourceService
             RentalDuration = userResource.RentalDuration,
             TimeRemaining = userResource.TimeRemaining
     };
-  } 
+  }
+
+  public async Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(string userId)
+  {
+    var userResources = await _context.UserResources
+            .Where(ur => ur.UserId == userId)
+            .ToListAsync();
+
+    return userResources.Select(ur => new UserResourceDto
+    {
+            UserResourceId = ur.UserResourceId,
+            UserId = ur.UserId.ToString(),
+            ResourceId = ur.ResourceId,
+            Status = ur.Status,
+            RentalStartTime = ur.RentalStartTime,
+            RentalDuration = ur.RentalDuration,
+            TimeRemaining = ur.TimeRemaining
+    });
+  }
+
   public async Task<UserResourceDto> ReturnResourceAsync(int userResourceId)
   {
     var userResource = await _context.UserResources.FindAsync(userResourceId);
