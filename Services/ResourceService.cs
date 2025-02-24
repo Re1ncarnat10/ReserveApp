@@ -2,7 +2,6 @@
 using ReserveApp.Data;
 using ReserveApp.Dtos;
 using ReserveApp.Interfaces;
-using ReserveApp.Models;
 
 namespace ReserveApp.Services;
 
@@ -24,8 +23,8 @@ public class ResourceService: IResourceService
       Name = r.Name,
       Description = r.Description,
       Type = r.Type,
-      Quantity = r.Quantity,
-      QuantityAvailable = CalculateQuantityAvailable(r)
+      Image = r.Image,
+      Availability = r.Availability,
     })
             .ToListAsync();
             
@@ -46,13 +45,8 @@ public class ResourceService: IResourceService
       Name = resource.Name,
       Description = resource.Description,
       Type = resource.Type,
-      Quantity = resource.Quantity,
-      QuantityAvailable = CalculateQuantityAvailable(resource)
+      Image = resource.Image,
+      Availability = resource.Availability,
     };
-  }
-  private int CalculateQuantityAvailable(Resource resource)
-  {
-    var reservedCount = resource.UserResources.Count(ur => ur.Status == "Reserved");
-    return resource.Quantity - reservedCount;
   }
 }

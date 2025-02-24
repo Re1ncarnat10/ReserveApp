@@ -16,13 +16,7 @@ public class UserService : IUserService
         _userManager = userManager;
         _httpContextAccessor = httpContextAccessor;
     }
-
-    public async Task<UserDto> GetUserInfoAsync()
-    {
-        var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return await GetUserInfoAsync(userId);
-    }
-
+    
     public async Task<UserDto> GetUserInfoAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -36,16 +30,9 @@ public class UserService : IUserService
             Surname = user.Surname,
             Email = user.Email,
             Department = user.Department,
-            WorkCity = user.WorkCity
         };
     }
-
-    public async Task<IdentityResult> UpdateUserInfoAsync(UserDto userDto)
-    {
-        var userId = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return await UpdateUserInfoAsync(userId, userDto);
-    }
-
+    
     public async Task<IdentityResult> UpdateUserInfoAsync(string userId, UserDto userDto)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -57,7 +44,6 @@ public class UserService : IUserService
         user.Surname = userDto.Surname;
         user.Email = userDto.Email;
         user.Department = userDto.Department;
-        user.WorkCity = userDto.WorkCity;
         return await _userManager.UpdateAsync(user);
     }
 }
