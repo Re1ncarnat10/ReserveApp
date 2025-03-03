@@ -15,7 +15,7 @@ namespace ReserveApp.Controllers
       _resourceService = resourceService;
     }
 
-    [HttpGet]
+    [HttpGet("resources")]
     public async Task<IActionResult> GetAllResources()
     {
       var resources = await _resourceService.GetAllResourcesAsync();

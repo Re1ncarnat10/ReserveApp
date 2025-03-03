@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddSwaggerGen(c =>
 {
   c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -41,19 +42,19 @@ builder.Services.AddSwaggerGen(c =>
   });
 });
 
+
 builder.Services.AddCors(options =>
 {
-        options.AddPolicy("AllowAllOrigins", builder =>
-        { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+  options.AddPolicy("AllowAllOrigins",
+          corsBuilder => { corsBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
 });
-});
+
 
 builder.Services.AddScoped<ILoginAndRegisterService, LoginAndRegisterService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserResourceService, UserResourceService>();
-builder.Services.AddHostedService<ResourceAvailabilityService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -67,6 +68,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
+
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSettings["Key"] ?? "DefaultKey";
@@ -89,24 +91,12 @@ builder.Services.AddAuthentication(options =>
                   ValidAudience = jwtSettings["Audience"],
                   IssuerSigningKey = new SymmetricSecurityKey(key)
           };
-          options.Events = new JwtBearerEvents
-          {
-                  OnAuthenticationFailed = context =>
-                  {
-                    var logger = context.HttpContext.RequestServices
-                            .GetRequiredService<ILogger<Program>>();
-                    logger.LogError(
-                            $"Authentication failed. Exception: {context.Exception.Message}");
-                    var sanitizedMessage = Regex.Replace(context.Exception.Message,
-                            @"[^\u0020-\u007E]", string.Empty);
-                    context.Response.Headers.Append("Authentication-Failed", sanitizedMessage);
-                    return Task.CompletedTask;
-                  }
-          };
         });
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
 
 using (var scope = app.Services.CreateScope())
 {
@@ -119,23 +109,27 @@ using (var scope = app.Services.CreateScope())
   await userService.InitializeAdminAsync();
 }
 
-if (!app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment())
+{
+  app.UseDeveloperExceptionPage();
+  app.UseSwagger();
+  app.UseSwaggerUI(c =>
+  {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = string.Empty;
+  });
+}
+else
 {
   app.UseExceptionHandler("/Error");
   app.UseHsts();
 }
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-  c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-  c.RoutePrefix = string.Empty;
-});
-
+app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseHttpsRedirection();
 app.Run();

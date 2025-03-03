@@ -7,6 +7,5 @@ public class UserResourceDto
   public int ResourceId { get; set; }
   public string Status { get; set; }
   public DateTime RentalStartTime { get; set; }
-  public TimeSpan RentalDuration { get; set; }
-  public TimeSpan TimeRemaining { get; set; }
+  public DateTime RentalEndTime { get; set; }
 }
