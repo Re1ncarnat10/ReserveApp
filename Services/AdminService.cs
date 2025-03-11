@@ -63,15 +63,88 @@ namespace ReserveApp.Services
       await _context.SaveChangesAsync();
     }
 
-    public async Task ChangeResourceStatusAsync(UserResourceDto userResourceDto, string newStatus)
+    public async Task ApproveUserRequestAsync(string userId, int resourceId)
     {
-      var userResource = await _context.UserResources.FindAsync(userResourceDto.UserResourceId);
+      using var transaction = await _context.Database.BeginTransactionAsync();
+
+      try
+      {
+        var request = await _context.UserResources
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.ResourceId == resourceId);
+
+        if (request == null)
+          throw new Exception("Request not found");
+
+        request.Status = "Approved";
+
+        var resource = await _context.Resources.FindAsync(resourceId);
+        if (resource == null)
+          throw new Exception("Resource not found");
+
+        resource.Availability = false;
+
+        var otherRequests = await _context.UserResources
+                .Where(ur =>
+                        ur.ResourceId == resourceId && ur.Status == "Pending" &&
+                        ur.UserId != userId)
+                .ToListAsync();
+
+        _context.UserResources.RemoveRange(otherRequests);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+      }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
+    }
+
+    public async Task RejectUserRequestAsync(string userId, int resourceId)
+    {
+      var userResource = await _context.UserResources.FindAsync(userId, resourceId);
       if (userResource == null)
       {
         throw new Exception("Resource request not found");
       }
 
-      userResource.Status = newStatus;
+      if (userResource.Status == "Pending")
+      {
+        _context.UserResources.Remove(userResource);
+        await _context.SaveChangesAsync();
+      }
+      else
+      {
+        throw new Exception("Resource request is not in pending status");
+      }
+    }
+
+    public async Task<IEnumerable<UserResourceDto>> GetExpiredUserResourcesAsync()
+    {
+      var expiredResources = await _context.UserResources
+              .Where(ur => ur.RentalEndTime < DateTime.UtcNow && ur.Status != "Returned")
+              .ToListAsync();
+
+      return expiredResources.Select(ur => new UserResourceDto
+      {
+              UserResourceId = ur.UserResourceId,
+              UserId = ur.UserId.ToString(),
+              ResourceId = ur.ResourceId,
+              Status = ur.Status,
+              RentalStartTime = ur.RentalStartTime,
+              RentalEndTime = ur.RentalEndTime
+      }).ToList();
+    }
+
+    public async Task<ResourceDto> ReturnResourceToCirculationAsync(int userResourceId)
+    {
+      var userResource = await _context.UserResources
+              .FirstOrDefaultAsync(ur => ur.UserResourceId == userResourceId);
+
+      if (userResource == null)
+      {
+        throw new Exception("User resource not found");
+      }
 
       var resource = await _context.Resources.FindAsync(userResource.ResourceId);
       if (resource == null)
@@ -79,29 +152,19 @@ namespace ReserveApp.Services
         throw new Exception("Resource not found");
       }
 
-      if (newStatus == "Returned")
-      {
-        resource.Availability = true;
-      }
-      else if (newStatus == "Accepted")
-      {
-        resource.Availability = false;
-      }
-
-      _context.UserResources.Update(userResource);
-      _context.Resources.Update(resource);
+      resource.Availability = true;
+      _context.UserResources.Remove(userResource);
       await _context.SaveChangesAsync();
-    }
 
-    public async Task UpdateUserResourceRentalDurationAsync(UserResourceDto userResourceDto,
-            TimeSpan additionalRentalDuration)
-    {
-      var userResource = await _context.UserResources.FindAsync(userResourceDto.UserResourceId);
-      if (userResource == null)
+      return new ResourceDto
       {
-        throw new Exception("Resource not found in user's inventory");
-      }
-      await _context.SaveChangesAsync();
+              ResourceId = resource.ResourceId,
+              Name = resource.Name,
+              Description = resource.Description,
+              Type = resource.Type,
+              Image = resource.Image,
+              Availability = resource.Availability
+      };
     }
 
     public async Task<IEnumerable<UserResourceDto>> GetAllUserResourcesAsync()
@@ -185,6 +248,7 @@ namespace ReserveApp.Services
       }
 
       await _userManager.AddToRoleAsync(adminUser, "Admin");
+      await _userManager.AddToRoleAsync(adminUser, "User");
     }
   }
 }

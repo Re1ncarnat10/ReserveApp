@@ -74,49 +74,40 @@ public class UserResourceService : IUserResourceService
 
   public async Task<UserResourceDto> ReturnResourceAsync(int userResourceId)
   {
-    var userResource = await _context.UserResources.FindAsync(userResourceId);
+    var userResource = await _context.UserResources
+            .FirstOrDefaultAsync(ur => ur.UserResourceId == userResourceId);
+
     if (userResource == null)
     {
       throw new Exception("Resource not found in user's inventory");
     }
 
-    if (userResource.Status == "Accepted")
-    {
-      userResource.Status = "Waiting for confirmation";
-    }
-    else if (userResource.Status == "Pending")
-    {
-      userResource.Status = "Cancelled";
-    }
-
-    await _context.SaveChangesAsync();
-
-    return new UserResourceDto
+    var returnDto = new UserResourceDto
     {
             UserResourceId = userResource.UserResourceId,
             UserId = userResource.UserId,
             ResourceId = userResource.ResourceId,
+            Status = userResource.Status,
             RentalStartTime = userResource.RentalStartTime,
             RentalEndTime = userResource.RentalEndTime
     };
-  }
 
-  public async Task DeleteResourceAsync(int userResourceId)
-  {
-    var userResource = await _context.UserResources.FindAsync(userResourceId);
-    if (userResource == null)
+    if (userResource.Status == "Approved")
     {
-      throw new Exception("Resource not found in user's inventory");
-    }
+      var resource = await _context.Resources.FindAsync(userResource.ResourceId);
+      if (resource != null)
+      {
+        resource.Availability = true;
+      }
 
-    if (userResource.Status == "Declined" || userResource.Status == "Cancelled")
+      _context.UserResources.Remove(userResource);
+    }
+    else if (userResource.Status == "Pending")
     {
       _context.UserResources.Remove(userResource);
-      await _context.SaveChangesAsync();
     }
-    else
-    {
-      throw new Exception("Resource status is not Declined or Cancelled");
-    }
+
+    await _context.SaveChangesAsync();
+    return returnDto;
   }
 }

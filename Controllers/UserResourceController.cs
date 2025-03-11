@@ -49,7 +49,7 @@ namespace ReserveApp.Controllers
       return Ok(requestedResource);
     }
 
-
+    [Authorize]
     [HttpGet("inventory")]
     public async Task<IActionResult> GetUserResourcesByUserId()
     {
@@ -83,26 +83,6 @@ namespace ReserveApp.Controllers
 
         var result = await _userResourceService.ReturnResourceAsync(userResourceId);
         return Ok(result);
-      }
-      catch (Exception ex)
-      {
-        return BadRequest(ex.Message);
-      }
-    }
-
-    [HttpDelete("{userResourceId}")]
-    public async Task<IActionResult> DeleteResource(int userResourceId)
-    {
-      try
-      {
-        var userId = _userManager.GetUserId(User);
-        if (userId == null)
-        {
-          return Unauthorized("User is not logged in");
-        }
-
-        await _userResourceService.DeleteResourceAsync(userResourceId);
-        return Ok("Resource deleted successfully");
       }
       catch (Exception ex)
       {

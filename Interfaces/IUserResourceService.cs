@@ -9,6 +9,5 @@ namespace ReserveApp.Interfaces
 
     Task<IEnumerable<UserResourceDto>> GetUserResourcesByUserIdAsync(string userId);
     Task<UserResourceDto> ReturnResourceAsync(int userResourceId);
-    Task DeleteResourceAsync(int userResourceId);
   }
 }
