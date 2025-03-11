@@ -15,20 +15,15 @@ namespace ReserveApp.Models
     [ForeignKey("ResourceId")] public virtual Resource? Resource { get; set; }
     [Required] public string Status { get; set; } = "Pending";
     [Required] public DateTime RentalStartTime { get; set; }
-    [Required] public TimeSpan RentalDuration { get; set; }
+    [Required] public DateTime RentalEndTime { get; set; }
+    
 
-    [NotMapped]
-    public TimeSpan TimeRemaining
+    public UserResource(string userId, int resourceId, DateTime rentalStartTime, DateTime rentalEndTime)
     {
-      get
-      {
-        var endTime = RentalStartTime.Add(RentalDuration);
-        return endTime - DateTime.Now;
-      }
-    }
-
-    public UserResource()
-    {
+      UserId = userId;
+      ResourceId = resourceId;
+      RentalStartTime = rentalStartTime;
+      RentalEndTime = rentalEndTime;
     }
   }
 }

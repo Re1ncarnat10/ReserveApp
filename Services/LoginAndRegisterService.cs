@@ -95,7 +95,13 @@ public class LoginAndRegisterService : ILoginAndRegisterService
                     SecurityAlgorithms.HmacSha256Signature)
     };
     var tokenHandler = new JwtSecurityTokenHandler();
-    var jwtToken = tokenHandler.CreateEncodedJwt(tokenDescriptor);
-    return new TokenDto { Token = jwtToken };
+    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+    var jwtToken = tokenHandler.WriteToken(securityToken);
+
+    return new TokenDto
+    {
+            Token = jwtToken,
+            Expiration = tokenDescriptor.Expires.Value
+    };
   }
 }
