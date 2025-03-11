@@ -250,5 +250,4 @@ namespace ReserveApp.Services
       await _userManager.AddToRoleAsync(adminUser, "Admin");
       await _userManager.AddToRoleAsync(adminUser, "User");
     }
-  }
 }
