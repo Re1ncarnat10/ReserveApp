@@ -22,11 +22,11 @@ namespace ReserveApp.Services
     {
       var resource = new Resource
       {
-              Name = resourceDto.Name,
-              Description = resourceDto.Description,
-              Type = resourceDto.Type,
-              Image = resourceDto.Image,
-              Availability = resourceDto.Availability
+        Name = resourceDto.Name,
+        Description = resourceDto.Description,
+        Type = resourceDto.Type,
+        Image = resourceDto.Image,
+        Availability = resourceDto.Availability
       };
       _context.Resources.Add(resource);
       await _context.SaveChangesAsync();
@@ -70,24 +70,38 @@ namespace ReserveApp.Services
       try
       {
         var request = await _context.UserResources
-                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.ResourceId == resourceId);
+          .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.ResourceId == resourceId);
 
         if (request == null)
-          throw new Exception("Request not found");
-
-        request.Status = "Approved";
+          throw new Exception("User resource request not found");
 
         var resource = await _context.Resources.FindAsync(resourceId);
         if (resource == null)
           throw new Exception("Resource not found");
+        
+        request.Status = "Approved";
+
+        var userHistory = new UserHistory
+        {
+          UserId = request.UserId,
+          ResourceId = request.ResourceId,
+          ResourceName = resource.Name,
+          ResourceDescription = resource.Description,
+          ResourceType = resource.Type,
+          ResourceImage = resource.Image,
+          ApprovedAt = DateTime.UtcNow,
+          RentalStartTime = request.RentalStartTime,
+          RentalEndTime = request.RentalEndTime
+        };
+        _context.UserHistories.Add(userHistory);
 
         resource.Availability = false;
 
         var otherRequests = await _context.UserResources
-                .Where(ur =>
-                        ur.ResourceId == resourceId && ur.Status == "Pending" &&
-                        ur.UserId != userId)
-                .ToListAsync();
+          .Where(ur =>
+            ur.ResourceId == resourceId && ur.Status == "Pending" &&
+            ur.UserId != userId)
+          .ToListAsync();
 
         _context.UserResources.RemoveRange(otherRequests);
         await _context.SaveChangesAsync();
@@ -122,24 +136,24 @@ namespace ReserveApp.Services
     public async Task<IEnumerable<UserResourceDto>> GetExpiredUserResourcesAsync()
     {
       var expiredResources = await _context.UserResources
-              .Where(ur => ur.RentalEndTime < DateTime.UtcNow && ur.Status != "Returned")
-              .ToListAsync();
+        .Where(ur => ur.RentalEndTime < DateTime.UtcNow && ur.Status != "Returned")
+        .ToListAsync();
 
       return expiredResources.Select(ur => new UserResourceDto
       {
-              UserResourceId = ur.UserResourceId,
-              UserId = ur.UserId.ToString(),
-              ResourceId = ur.ResourceId,
-              Status = ur.Status,
-              RentalStartTime = ur.RentalStartTime,
-              RentalEndTime = ur.RentalEndTime
+        UserResourceId = ur.UserResourceId,
+        UserId = ur.UserId.ToString(),
+        ResourceId = ur.ResourceId,
+        Status = ur.Status,
+        RentalStartTime = ur.RentalStartTime,
+        RentalEndTime = ur.RentalEndTime
       }).ToList();
     }
 
     public async Task<ResourceDto> ReturnResourceToCirculationAsync(int userResourceId)
     {
       var userResource = await _context.UserResources
-              .FirstOrDefaultAsync(ur => ur.UserResourceId == userResourceId);
+        .FirstOrDefaultAsync(ur => ur.UserResourceId == userResourceId);
 
       if (userResource == null)
       {
@@ -158,12 +172,12 @@ namespace ReserveApp.Services
 
       return new ResourceDto
       {
-              ResourceId = resource.ResourceId,
-              Name = resource.Name,
-              Description = resource.Description,
-              Type = resource.Type,
-              Image = resource.Image,
-              Availability = resource.Availability
+        ResourceId = resource.ResourceId,
+        Name = resource.Name,
+        Description = resource.Description,
+        Type = resource.Type,
+        Image = resource.Image,
+        Availability = resource.Availability
       };
     }
 
@@ -172,12 +186,12 @@ namespace ReserveApp.Services
       var userResources = await _context.UserResources.ToListAsync();
       return userResources.Select(ur => new UserResourceDto
       {
-              UserResourceId = ur.UserResourceId,
-              UserId = ur.UserId.ToString(),
-              ResourceId = ur.ResourceId,
-              Status = ur.Status,
-              RentalStartTime = ur.RentalStartTime,
-              RentalEndTime = ur.RentalEndTime
+        UserResourceId = ur.UserResourceId,
+        UserId = ur.UserId.ToString(),
+        ResourceId = ur.ResourceId,
+        Status = ur.Status,
+        RentalStartTime = ur.RentalStartTime,
+        RentalEndTime = ur.RentalEndTime
       }).ToList();
     }
 
@@ -191,11 +205,11 @@ namespace ReserveApp.Services
 
       return new UserDto
       {
-              Id = user.Id,
-              Name = user.Name,
-              Surname = user.Surname,
-              Email = user.Email,
-              Department = user.Department,
+        Id = user.Id,
+        Name = user.Name,
+        Surname = user.Surname,
+        Email = user.Email,
+        Department = user.Department,
       };
     }
 
@@ -204,11 +218,11 @@ namespace ReserveApp.Services
       var users = await _userManager.Users.ToListAsync();
       return users.Select(user => new UserDto
       {
-              Id = user.Id,
-              Name = user.Name,
-              Surname = user.Surname,
-              Email = user.Email,
-              Department = user.Department,
+        Id = user.Id,
+        Name = user.Name,
+        Surname = user.Surname,
+        Email = user.Email,
+        Department = user.Department,
       }).ToList();
     }
 
@@ -235,11 +249,11 @@ namespace ReserveApp.Services
 
       adminUser = new User
       {
-              UserName = adminEmail,
-              Email = adminEmail,
-              Name = "Admin",
-              Surname = "Adminowski",
-              Department = "Administrator",
+        UserName = adminEmail,
+        Email = adminEmail,
+        Name = "Admin",
+        Surname = "Adminowski",
+        Department = "Administrator",
       };
       var createUserResult = await _userManager.CreateAsync(adminUser, "Admin123!");
       if (!createUserResult.Succeeded)
@@ -250,4 +264,5 @@ namespace ReserveApp.Services
       await _userManager.AddToRoleAsync(adminUser, "Admin");
       await _userManager.AddToRoleAsync(adminUser, "User");
     }
+  }
 }

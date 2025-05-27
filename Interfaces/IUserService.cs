@@ -7,5 +7,5 @@ public interface IUserService
 {
   Task<UserDto> GetUserInfoAsync(string userId);
   Task<IdentityResult> UpdateUserInfoAsync(string userId, UserDto userDto);
-  
+  Task<IEnumerable<UserHistoryDto>> GetUserHistoryAsync(string userId);
 }

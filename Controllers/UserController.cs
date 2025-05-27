@@ -63,5 +63,22 @@ namespace ReserveApp.Controllers
         return NotFound(ex.Message);
       }
     }
+    [HttpGet("me/history")]
+    public async Task<IActionResult> GetMyHistory()
+    {
+      var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+      if (string.IsNullOrEmpty(userId))
+        return Unauthorized("User ID claim not found");
+
+      try
+      {
+        var history = await _userService.GetUserHistoryAsync(userId);
+        return Ok(history);
+      }
+      catch (Exception ex)
+      {
+        return NotFound(ex.Message);
+      }
+    }
   }
 }
